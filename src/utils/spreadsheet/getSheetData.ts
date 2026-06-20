@@ -1,6 +1,6 @@
 export const getSheetData_ = (
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
-): any[][] => {
+): string[][] => {
   const range = sheet.getDataRange();
   const values = range.getValues();
   return values;
@@ -8,7 +8,7 @@ export const getSheetData_ = (
 
 export const getSheetDataObj_ = (
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
-): { head: any[]; data: any[] } => {
+): { head: string[]; data: string[] } => {
   const range = sheet.getDataRange();
   const values = range.getValues();
   const [head, ...rows] = values;

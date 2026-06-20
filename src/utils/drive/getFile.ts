@@ -4,7 +4,7 @@ export const getFileById_ = (
   try {
     const file = DriveApp.getFileById(id);
     return file;
-  } catch (error) {
+  } catch {
     // 不正なID / アクセス不可
     return null;
   }
