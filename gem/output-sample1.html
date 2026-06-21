@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TaskBoard - プロトタイプ</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      /* 全体の背景色調整と高さ確保 */
+      body {
+        background-color: #f5f5f5;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .main-content {
+        flex: 1;
+        padding: 2rem 1rem;
+      }
+      /* カラムの最小高さを確保して空のときもドロップエリアとして見やすくする */
+      .task-column-list {
+        min-height: 300px;
+        background-color: #ebeded;
+        border-radius: 6px;
+        padding: 0.75rem;
+      }
+      /* フローティング（画面右下固定）プラスボタンのスタイル */
+      .fab-button {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 40;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        border-radius: 50%;
+        width: 64px;
+        height: 64px;
+      }
+      /* カード間の余白 */
+      .task-card {
+        margin-bottom: 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar is-link" role="navigation" aria-label="main navigation">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-4 has-text-weight-bold" href="#">
+          <i class="fa-solid fa-list-check mr-2"></i> TaskBoard
+        </a>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div class="container">
+        <div class="columns">
+          <div class="column">
+            <div class="box p-3">
+              <h2 class="title is-5 has-text-grey-dark mb-3">
+                <span class="tag is-info is-light mr-2" id="count-todo">0</span
+                >未着手
+              </h2>
+              <div id="col-todo" class="task-column-list"></div>
+            </div>
+          </div>
+
+          <div class="column">
+            <div class="box p-3">
+              <h2 class="title is-5 has-text-grey-dark mb-3">
+                <span class="tag is-warning is-light mr-2" id="count-doing"
+                  >0</span
+                >進行中
+              </h2>
+              <div id="col-doing" class="task-column-list"></div>
+            </div>
+          </div>
+
+          <div class="column">
+            <div class="box p-3">
+              <h2 class="title is-5 has-text-grey-dark mb-3">
+                <span class="tag is-success is-light mr-2" id="count-done"
+                  >0</span
+                >完了
+              </h2>
+              <div id="col-done" class="task-column-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <button
+      class="button is-link is-large fab-button"
+      id="btn-open-modal"
+      title="新規タスク追加"
+    >
+      <i class="fa-solid fa-plus"></i>
+    </button>
+
+    <div class="modal" id="modal-add-task">
+      <div class="modal-background" id="modal-bg"></div>
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">新規タスク追加</p>
+          <button
+            class="delete"
+            aria-label="close"
+            id="btn-close-modal-x"
+          ></button>
+        </header>
+        <section class="modal-card-body">
+          <div class="field">
+            <label class="label">タスク名</label>
+            <div class="control">
+              <input
+                class="input"
+                type="text"
+                id="input-task-title"
+                placeholder="タスクのタイトルを入力してください"
+                autocomplete="off"
+              />
+            </div>
+            <p class="help is-danger is-hidden" id="task-error-msg">
+              タスク名を入力してください。
+            </p>
+          </div>
+        </section>
+        <footer class="modal-card-foot is-justify-content-flex-end">
+          <button class="button" id="btn-close-modal-cancel">キャンセル</button>
+          <button class="button is-link" id="btn-submit-task">追加</button>
+        </footer>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // DOM要素の取得
+        const modal = document.getElementById("modal-add-task");
+        const btnOpenModal = document.getElementById("btn-open-modal");
+        const btnCloseModalX = document.getElementById("btn-close-modal-x");
+        const btnCloseModalCancel = document.getElementById(
+          "btn-close-modal-cancel",
+        );
+        const btnSubmitTask = document.getElementById("btn-submit-task");
+        const modalBg = document.getElementById("modal-bg");
+        const inputTaskTitle = document.getElementById("input-task-title");
+        const errorMsg = document.getElementById("task-error-msg");
+
+        const colTodo = document.getElementById("col-todo");
+        const colDoing = document.getElementById("col-doing");
+        const colDone = document.getElementById("col-done");
+
+        // タスクデータのID管理用カウンター
+        let taskIdCounter = 1;
+
+        // --- モーダル開閉処理 ---
+        const openModal = () => {
+          modal.classList.add("is-active");
+          inputTaskTitle.value = "";
+          errorMsg.classList.add("is-hidden");
+          inputTaskTitle.classList.remove("is-danger");
+          setTimeout(() => inputTaskTitle.focus(), 100);
+        };
+
+        const closeModal = () => {
+          modal.classList.remove("is-active");
+        };
+
+        btnOpenModal.addEventListener("click", openModal);
+        btnCloseModalX.addEventListener("click", closeModal);
+        btnCloseModalCancel.addEventListener("click", closeModal);
+        modalBg.addEventListener("click", closeModal);
+
+        // エンターキーでもタスク追加できるようにする
+        inputTaskTitle.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            createTask();
+          }
+        });
+
+        btnSubmitTask.addEventListener("click", createTask);
+
+        // --- バッジカウント更新処理 ---
+        const updateCounts = () => {
+          document.getElementById("count-todo").textContent =
+            colTodo.children.length;
+          document.getElementById("count-doing").textContent =
+            colDoing.children.length;
+          document.getElementById("count-done").textContent =
+            colDone.children.length;
+        };
+
+        // --- タスク生成・操作関数 ---
+        function createTask() {
+          const titleText = inputTaskTitle.value.trim();
+
+          // バリデーション
+          if (!titleText) {
+            errorMsg.classList.remove("is-hidden");
+            inputTaskTitle.classList.add("is-danger");
+            return;
+          }
+
+          const currentId = `task-${taskIdCounter++}`;
+
+          // タスクカードのHTML要素を作成
+          const card = document.createElement("div");
+          card.className = "card task-card";
+          card.id = currentId;
+          card.innerHTML = `
+                    <div class="card-content p-4">
+                        <p class="title is-6 has-text-grey-darker mb-3 task-title-text">${titleText}</p>
+                        <div class="buttons is-right mb-0">
+                            <button class="button is-small is-danger is-light btn-delete" data-id="${currentId}">
+                                <span class="icon is-small"><i class="fa-solid fa-trash"></i></span>
+                                <span>削除</span>
+                            </button>
+                            <button class="button is-small is-link btn-proceed" data-id="${currentId}">
+                                <span>進める</span>
+                                <span class="icon is-small"><i class="fa-solid fa-arrow-right"></i></span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+          // 未着手カラムにカードを追加
+          colTodo.appendChild(card);
+          closeModal();
+          updateCounts();
+
+          // イベントリスナーの適用（進める・削除）
+          const btnProceed = card.querySelector(".btn-proceed");
+          const btnDelete = card.querySelector(".btn-delete");
+
+          // 「進める」ボタンのクリック挙動
+          btnProceed.addEventListener("click", () => {
+            const currentColumnId = card.parentElement.id;
+
+            if (currentColumnId === "col-todo") {
+              // 未着手 -> 進行中
+              colDoing.appendChild(card);
+            } else if (currentColumnId === "col-doing") {
+              // 進行中 -> 完了
+              colDone.appendChild(card);
+              // 完了状態になったので「進める」ボタンを非表示（削除）にする
+              btnProceed.remove();
+              // 完了したタスクのタイトルに打ち消し線を引く（視覚的演出）
+              card.querySelector(".task-title-text").style.textDecoration =
+                "line-through";
+              card
+                .querySelector(".task-title-text")
+                .classList.add("has-text-grey-light");
+            }
+            updateCounts();
+          });
+
+          // 「削除」ボタンのクリック挙動
+          btnDelete.addEventListener("click", () => {
+            card.remove();
+            updateCounts();
+          });
+        }
+
+        // 初期カウントの同期
+        updateCounts();
+      });
+    </script>
+  </body>
+</html>

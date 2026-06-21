@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>料金シミュレーター - プロトタイプ</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+      }
+      .hero.is-primary-custom {
+        background-color: #209cee;
+        color: white;
+      }
+      .simulator-container {
+        padding: 2rem 1rem;
+      }
+      .result-box {
+        background-color: #ffffff;
+        border-top: 4px solid #209cee;
+        position: sticky;
+        top: 2rem;
+      }
+      .total-amount-display {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #209cee;
+        margin: 1rem 0;
+      }
+      .error-message {
+        color: #f14668;
+        font-weight: bold;
+        font-size: 1.25rem;
+        margin: 1rem 0;
+      }
+      .itemized-table th {
+        background-color: #fafafa;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="hero is-primary-custom mb-5">
+      <div class="hero-body">
+        <div class="container">
+          <h1 class="title has-text-white">
+            <i class="fa-solid fa-calculator mr-2"></i>
+            クラウドサービス料金シミュレーター
+          </h1>
+          <p class="subtitle has-text-white is-6">
+            プランやアカウント数に合わせて、リアルタイムで月額の見積もり金額を計算します。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <main class="simulator-container">
+      <div class="container">
+        <div class="columns is-desktop">
+          <div class="column is-7-desktop">
+            <div class="box p-5">
+              <h2 class="title is-4 border-bottom pb-2">
+                <i class="fa-solid fa-sliders mr-2 has-text-link"></i> 1.
+                条件を設定する
+              </h2>
+
+              <div class="field mb-5">
+                <label class="label">プランの選択</label>
+                <div class="control">
+                  <div class="b-radio-group">
+                    <label class="radio is-block box p-3 mb-2">
+                      <input type="radio" name="plan" value="5000" checked />
+                      <strong class="ml-2">ベーシックプラン</strong>
+                      <span class="tag is-info is-light is-pulled-right"
+                        >月額 5,000円</span
+                      >
+                    </label>
+                    <label class="radio is-block box p-3 mb-0">
+                      <input type="radio" name="plan" value="15000" />
+                      <strong class="ml-2">プロプラン</strong>
+                      <span class="tag is-link is-light is-pulled-right"
+                        >月額 15,000円</span
+                      >
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field mb-5">
+                <label class="label" for="input-accounts">アカウント数</label>
+                <div class="control has-icons-left">
+                  <input
+                    class="input is-medium"
+                    type="number"
+                    id="input-accounts"
+                    value="1"
+                    min="0"
+                    step="1"
+                  />
+                  <span class="icon is-left">
+                    <i class="fa-solid fa-users"></i>
+                  </span>
+                </div>
+                <p class="help text-muted">
+                  ご利用になるユーザー数を入力してください（1以上）。
+                </p>
+              </div>
+
+              <div class="field mb-2">
+                <label class="label">追加オプション</label>
+                <div class="control">
+                  <label class="checkbox is-block box p-3 mb-2">
+                    <input type="checkbox" id="opt-storage" value="2000" />
+                    <span class="ml-2"
+                      ><strong>ストレージ増量</strong
+                      >（大容量データの保存に）</span
+                    >
+                    <span class="tag is-light is-pulled-right"
+                      >+月額 2,000円</span
+                    >
+                  </label>
+                  <label class="checkbox is-block box p-3 mb-0">
+                    <input type="checkbox" id="opt-support" value="3000" />
+                    <span class="ml-2"
+                      ><strong>サポート優先</strong>（24時間優先対応対応）</span
+                    >
+                    <span class="tag is-light is-pulled-right"
+                      >+月額 3,000円</span
+                    >
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="column is-5-desktop">
+            <div class="box p-5 result-box shadow">
+              <h2 class="title is-4">
+                <i
+                  class="fa-solid fa-file-invoice-dollar mr-2 has-text-success"
+                ></i>
+                2. 見積もり結果
+              </h2>
+
+              <div
+                class="has-text-centered my-4 py-3"
+                style="background-color: #f9fbfd; border-radius: 6px"
+              >
+                <p class="heading is-size-6 mb-1">概算月額合計（税込）</p>
+
+                <div id="area-valid-total">
+                  <span class="total-amount-display" id="display-total"
+                    >¥0</span
+                  >
+                </div>
+
+                <div id="area-error" class="is-hidden px-3">
+                  <p class="error-message">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i>
+                    アカウント数は1以上を指定してください
+                  </p>
+                </div>
+              </div>
+
+              <div id="area-details">
+                <p class="label mb-2">料金内訳</p>
+                <table class="table is-fullwidth is-striped itemized-table">
+                  <thead>
+                    <tr>
+                      <th>項目</th>
+                      <th class="has-text-right">金額</th>
+                    </tr>
+                  </thead>
+                  <tbody id="detail-rows"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // 要素の取得
+        const planRadios = document.querySelectorAll('input[name="plan"]');
+        const accountsInput = document.getElementById("input-accounts");
+        const optStorage = document.getElementById("opt-storage");
+        const optSupport = document.getElementById("opt-support");
+
+        const areaValidTotal = document.getElementById("area-valid-total");
+        const areaError = document.getElementById("area-error");
+        const areaDetails = document.getElementById("area-details");
+        const displayTotal = document.getElementById("display-total");
+        const detailRows = document.getElementById("detail-rows");
+
+        // 日本円のフォーマット関数
+        const formatCurrency = (num) => {
+          return "¥" + num.toLocaleString();
+        };
+
+        // 計算および画面更新メイン処理
+        const calculateQuote = () => {
+          // 1. 値の取得
+          let selectedPlanPrice = 0;
+          let planName = "";
+          planRadios.forEach((radio) => {
+            if (radio.checked) {
+              selectedPlanPrice = parseInt(radio.value, 10);
+              planName =
+                selectedPlanPrice === 5000 ? "ベーシックプラン" : "プロプラン";
+            }
+          });
+
+          const accountsCount = parseInt(accountsInput.value, 10);
+
+          // 2. エラーチェック（アカウント数が0以下の場合）
+          if (isNaN(accountsCount) || accountsCount <= 0) {
+            areaValidTotal.classList.add("is-hidden");
+            areaDetails.classList.add("is-hidden");
+            areaError.classList.remove("is-hidden");
+            return;
+          }
+
+          // エラー解除
+          areaError.classList.add("is-hidden");
+          areaValidTotal.classList.remove("is-hidden");
+          areaDetails.classList.remove("is-hidden");
+
+          // 3. 料金計算
+          const planTotal = selectedPlanPrice * accountsCount;
+          let optionsTotal = 0;
+          const activeOptions = [];
+
+          if (optStorage.checked) {
+            const price = parseInt(optStorage.value, 10);
+            optionsTotal += price;
+            activeOptions.push({
+              name: "オプション：ストレージ増量",
+              price: price,
+            });
+          }
+          if (optSupport.checked) {
+            const price = parseInt(optSupport.value, 10);
+            optionsTotal += price;
+            activeOptions.push({
+              name: "オプション：サポート優先",
+              price: price,
+            });
+          }
+
+          const grandTotal = planTotal + optionsTotal;
+
+          // 4. UIの更新（合計金額）
+          displayTotal.textContent = formatCurrency(grandTotal);
+
+          // 5. UIの更新（内訳テーブル）
+          let rowsHtml = "";
+
+          // 基本プラン料金行
+          rowsHtml += `
+                    <tr>
+                        <td>
+                            ${planName} <span class="has-text-grey is-size-7">(${formatCurrency(selectedPlanPrice)} × ${accountsCount}名)</span>
+                        </td>
+                        <td class="has-text-right">${formatCurrency(planTotal)}</td>
+                    </tr>
+                `;
+
+          // オプション行
+          activeOptions.forEach((opt) => {
+            rowsHtml += `
+                        <tr>
+                            <td>${opt.name}</td>
+                            <td class="has-text-right">${formatCurrency(opt.price)}</td>
+                        </tr>
+                    `;
+          });
+
+          // オプションが何もない場合のプレースホルダー
+          if (activeOptions.length === 0) {
+            rowsHtml += `
+                        <tr>
+                            <td class="has-text-grey-light is-italic">選択中のオプションなし</td>
+                            <td class="has-text-right has-text-grey-light">¥0</td>
+                        </tr>
+                    `;
+          }
+
+          // 合計行（内訳テーブル下部）
+          rowsHtml += `
+                    <tr class="has-text-weight-bold" style="border-top: 2px solid #dbdbdb;">
+                        <td>合計金額</td>
+                        <td class="has-text-right has-text-link">${formatCurrency(grandTotal)}</td>
+                    </tr>
+                `;
+
+          detailRows.innerHTML = rowsHtml;
+        };
+
+        // イベントリスナーの登録（変更をリアルタイム検知）
+        planRadios.forEach((radio) => {
+          radio.addEventListener("change", calculateQuote);
+        });
+        accountsInput.addEventListener("input", calculateQuote);
+        accountsInput.addEventListener("change", calculateQuote);
+        optStorage.addEventListener("change", calculateQuote);
+        optSupport.addEventListener("change", calculateQuote);
+
+        // 初期実行
+        calculateQuote();
+      });
+    </script>
+  </body>
+</html>
