@@ -8,6 +8,7 @@
 - Advanced Google Servicesの利用試したい
 - 下記作成する
   - https://zenn.dev/wwwave/articles/d33a08c958e0a2
+  - https://github.com/swat9013/gas-html-share
 
 ## アイデア
 
