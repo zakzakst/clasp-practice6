@@ -61,6 +61,8 @@ const renderMessage_ = (
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 };
 
+/* ───────────── 実行 ───────────── */
+
 /**
  * ウェブアプリのエントリポイント。
  * @param e リクエストイベント
