@@ -15,7 +15,7 @@ const prop_ = (key: string): string => {
  * 共有HTMLを置くDriveフォルダのID。
  * @returns スクリプトプロパティ FOLDER_ID
  */
-const folderId_ = (): string => {
+export const folderId_ = (): string => {
   return prop_("FOLDER_ID");
 };
 
