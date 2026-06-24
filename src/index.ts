@@ -87,6 +87,7 @@ const renderIndex = (): GoogleAppsScript.HTML.HtmlOutput => {
   const fid = folderId_();
   const tmpl = HtmlService.createHtmlOutputFromFile("index");
   // TODO: この辺からやってること追えていないindex.htmlの内容を見てから再度確認する
+  // htmlファイルをテンプレートエンジン的に利用できるっぽい。そのパラメータをここで設定できる
   tmpl.boot = JSON.stringify({
     tree: tree,
     isOwner: owner,
@@ -96,8 +97,10 @@ const renderIndex = (): GoogleAppsScript.HTML.HtmlOutput => {
   tmpl.folderUrl = fid ? "https://drive.google.com/drive/folders/" + fid : "#";
   tmpl.listError = listError;
   tmpl.configured = !!fid;
+  // evaluateは下記？ただ、HtmlService.createTemplateのほうに書いてあって、HtmlService.createHtmlOutputFromFileのほうには書いてなかった。テンプレートエンジン的な利用について勉強する時に意識する。ここでは一旦保留
+  // https://developers.google.com/apps-script/reference/html/html-template?hl=ja#evaluate()
   return tmpl
-    .evalute()
+    .evaluate()
     .setTitle("HTML 管理")
     .addMetaTag("viewport", "width=device-width, initial-scale=1")
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);

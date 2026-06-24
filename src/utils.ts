@@ -46,6 +46,7 @@ export const assertOwner_ = () => {
   }
 };
 
+// TODO: この関数便利。使い方覚える
 /**
  * HTMLテンプレートから別HTMLファイルの中身を取り込む（styles/app 用）。
  * @param filename HTMLファイル名
