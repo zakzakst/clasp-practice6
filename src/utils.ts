@@ -31,7 +31,7 @@ const ownerEmail_ = (): string => {
  * アクセス中のユーザーがオーナー本人か判定する。
  * @returns 判定結果
  */
-const isOwner_ = (): boolean => {
+export const isOwner_ = (): boolean => {
   const owner = ownerEmail_();
   const active = Session.getActiveUser().getEmail();
   return !!owner && !!active && owner === active;
@@ -46,6 +46,7 @@ export const assertOwner_ = () => {
   }
 };
 
+// TODO: この関数便利。使い方覚える
 /**
  * HTMLテンプレートから別HTMLファイルの中身を取り込む（styles/app 用）。
  * @param filename HTMLファイル名
