@@ -7,7 +7,8 @@
       "@document/*": ["./src/utils/document/*"],
       "@calendar/*": ["./src/utils/calendar/*"],
       "@spreadsheet/*": ["./src/utils/spreadsheet/*"],
-      "@drive/*": ["./src/utils/drive/*"]
+      "@drive/*": ["./src/utils/drive/*"],
+      "@app-script/*": ["./src/utils/app-script/*"]
     }
   },
   "include": ["src/**/*"]
